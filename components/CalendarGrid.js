@@ -505,6 +505,10 @@ export default function CalendarGrid({
             font-size: 0.82rem;
           }
 
+          .day-cell.day-today {
+            padding: 2px;
+          }
+
           .festival-indicator,
           .special-indicator {
             font-size: 0.5rem;

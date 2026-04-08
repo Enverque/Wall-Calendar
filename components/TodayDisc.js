@@ -79,13 +79,22 @@ export default function TodayDisc({ day }) {
     <div
       style={{
         position: 'relative',
-        width: SIZE,
-        height: SIZE,
+        width: '100%',
+        height: '100%',
+        maxWidth: SIZE,
+        maxHeight: SIZE,
+        aspectRatio: '1 / 1',
+        margin: 'auto',
         filter: `drop-shadow(0 6px 12px ${palette.glow})`,
       }}
       title={`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`}
     >
-      <svg width={SIZE} height={SIZE} style={{ position: 'absolute', inset: 0 }}>
+      <svg
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        style={{ position: 'absolute', inset: 0 }}
+      >
         <circle cx={cx} cy={cy} r={outerR} fill={palette.outer} />
         <circle cx={cx} cy={cy} r={innerR} fill={palette.inner} />
         <circle cx={cx} cy={cy} r={outerR} fill="none" stroke={palette.rim} strokeWidth="1.8" />
