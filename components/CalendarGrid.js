@@ -62,15 +62,14 @@ export default function CalendarGrid({
   const isToday = (d) =>
     d === today.getDate() && month === today.getMonth() && year === today.getFullYear()
 
-  const [hoverQuote, setHoverQuote] = useState(null)
-  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
-  const [hoverFest, setHoverFest]   = useState(null)
-  const [festPos, setFestPos]       = useState({ x: 0, y: 0 })
+  const [activePopup, setActivePopup] = useState(null)
   const [historyDay, setHistoryDay] = useState(null)
-  const [reminderDay, setReminderDay] = useState(null)
-  const [reminderPos, setReminderPos] = useState({ x: 0, y: 0 })
   const [cellAnimations, setCellAnimations] = useState({})
   const hoverTimer = useRef(null)
+
+  const closeActivePopup = useCallback(() => {
+    setActivePopup(null)
+  }, [])
 
   const getPopupPosition = useCallback((rect, popupWidth, popupHeight, options = {}) => {
     if (!containerRef.current) return { x: 0, y: 0 }
@@ -172,6 +171,9 @@ export default function CalendarGrid({
     if (!d) return
     onDayHoverImage?.(d)
 
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    closeActivePopup()
+
     const rect = e.currentTarget.getBoundingClientRect()
     const quotePosition = getPopupPosition(rect, 196, 112, {
       side: 'right',
@@ -193,17 +195,14 @@ export default function CalendarGrid({
       align: 'center',
       gap: 30,
     })
-
-    // Clear previous timer
-    if (hoverTimer.current) clearTimeout(hoverTimer.current)
-
     // Show special day reminder
     const special = getSpecialDay(d)
     if (special) {
-      setHoverQuote(null)
-      setHoverFest(null)
-      setReminderDay(special)
-      setReminderPos(specialPosition)
+      setActivePopup({
+        type: 'special',
+        data: special,
+        position: specialPosition,
+      })
       return
     }
 
@@ -213,38 +212,46 @@ export default function CalendarGrid({
     if (currentDay) {
       const quote = getQuoteForDay(quotes, year, month, d)
       if (quote) {
-        setHoverQuote(quote)
-        setTooltipPos(quotePosition)
+        setActivePopup({
+          type: 'quote',
+          data: quote,
+          position: quotePosition,
+        })
       }
-    } else {
-      setHoverQuote(null)
+      return
     }
 
-  
     const fest = getFestival(d)
     if (fest) {
-      setHoverFest(fest)
-      setFestPos(festivalPosition)
+      setActivePopup({
+        type: 'festival',
+        data: fest,
+        position: festivalPosition,
+      })
     }
-  }, [year, month, quotes, getFestival, getPopupPosition, getSpecialDay, onDayHoverImage])
+  }, [year, month, quotes, getFestival, getPopupPosition, getSpecialDay, onDayHoverImage, closeActivePopup])
 
   const handleMouseLeave = useCallback(() => {
     onDayHoverImage?.(null)
     hoverTimer.current = setTimeout(() => {
-      setHoverQuote(null)
-      setHoverFest(null)
-      setReminderDay(null)
-      setReminderPos({ x: 0, y: 0 })
+      closeActivePopup()
     }, 100)
-  }, [onDayHoverImage])
+  }, [onDayHoverImage, closeActivePopup])
 
   const handleDayDoubleClick = useCallback((d) => {
     if (!d) return
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    closeActivePopup()
     const eventKey = `${pad2(month + 1)}-${pad2(d)}`
     const eventsForDay = Array.isArray(events?.[eventKey]) ? events[eventKey].slice(0, 3) : null
 
     setHistoryDay({ day: d, month, year, events: eventsForDay })
-  }, [month, year, events])
+  }, [month, year, events, closeActivePopup])
+
+  useEffect(() => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    closeActivePopup()
+  }, [rangeStart, rangeEnd, closeActivePopup])
 
   const isInRange = (d) => {
     if (!startTs || !endTs) return false
@@ -319,9 +326,24 @@ export default function CalendarGrid({
       </div>
 
       {}
-      <QuoteTooltip quote={hoverQuote} x={tooltipPos.x} y={tooltipPos.y} visible={!!hoverQuote} />
-      <FestivalTooltip festival={hoverFest} x={festPos.x} y={festPos.y} visible={!!hoverFest} />
-      <SpecialDayReminder day={reminderDay} x={reminderPos.x} y={reminderPos.y} visible={!!reminderDay} />
+      <QuoteTooltip
+        quote={activePopup?.type === 'quote' ? activePopup.data : null}
+        x={activePopup?.position?.x ?? 0}
+        y={activePopup?.position?.y ?? 0}
+        visible={activePopup?.type === 'quote'}
+      />
+      <FestivalTooltip
+        festival={activePopup?.type === 'festival' ? activePopup.data : null}
+        x={activePopup?.position?.x ?? 0}
+        y={activePopup?.position?.y ?? 0}
+        visible={activePopup?.type === 'festival'}
+      />
+      <SpecialDayReminder
+        day={activePopup?.type === 'special' ? activePopup.data : null}
+        x={activePopup?.position?.x ?? 0}
+        y={activePopup?.position?.y ?? 0}
+        visible={activePopup?.type === 'special'}
+      />
 
       {}
       {historyDay && (
