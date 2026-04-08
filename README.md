@@ -34,14 +34,40 @@ npm run start
 ## Project Structure
 
 ```
-Calender/
+Calendar/
 ├── app/
 │   ├── globals.css
 │   ├── layout.js
 │   └── page.js
 ├── components/
-│   ├── WallCalendar.js
-│   ├── HeroImage.js
 │   ├── CalendarGrid.js
-│   └── NotesPanel.js
+│   ├── Festivalcanvas.js
+│   ├── FestivalEffects.js
+│   ├── FestivalTooltip.js
+│   ├── HeroImage.js
+│   ├── HistoryModal.js
+│   ├── NotesPanel.js
+│   ├── QuoteTooltip.js
+│   ├── SpecialDayReminder.js
+│   ├── Timetravelhero.js
+│   ├── TimeTravelHeroFixed.js
+│   ├── TodayDisc.js
+│   ├── WallCalendar.js
+│   └── YearTimeline.js
+├── hooks/
+│   └── useCalendarData.js
+├── public/
+│   └── data/
+│       ├── festivals.json
+│       ├── historical-events.json
+│       └── quotes.json
+├── .eslintignore
+├── .gitignore
+├── eslint.config.mjs
+├── next.config.js
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── README.md
+└── tailwind.config.js
 ```
