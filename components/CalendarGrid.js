@@ -337,13 +337,14 @@ export default function CalendarGrid({
       <style>{`
         .calendar-container {
           width: 100%;
+          min-width: 0;
           position: relative;
           overflow: visible;
         }
 
         .calendar-headers {
           display: grid;
-          grid-template-columns: repeat(7, 1fr);
+          grid-template-columns: repeat(7, minmax(0, 1fr));
           gap: 8px;
           margin-bottom: 12px;
         }
@@ -359,7 +360,7 @@ export default function CalendarGrid({
 
         .calendar-grid {
           display: grid;
-          grid-template-columns: repeat(7, 1fr);
+          grid-template-columns: repeat(7, minmax(0, 1fr));
           gap: 8px;
         }
 
@@ -487,6 +488,27 @@ export default function CalendarGrid({
         @keyframes twinkle {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 640px) {
+          .calendar-headers,
+          .calendar-grid {
+            gap: 4px;
+          }
+
+          .calendar-header-cell {
+            font-size: 0.6rem;
+            letter-spacing: 0.06em;
+          }
+
+          .day-cell {
+            font-size: 0.82rem;
+          }
+
+          .festival-indicator,
+          .special-indicator {
+            font-size: 0.5rem;
+          }
         }
       `}</style>
     </div>

@@ -246,7 +246,7 @@ export default function WallCalendar() {
             />
 
             {}
-            <div className="flex-1 p-5 md:p-8">
+            <div className="flex-1 min-w-0 p-4 md:p-8">
               <CalendarGrid
                 year={year}
                 month={month}

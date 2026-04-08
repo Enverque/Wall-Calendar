@@ -35,6 +35,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding: 12px 0 24px;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
 
