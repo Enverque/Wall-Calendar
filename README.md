@@ -48,12 +48,13 @@ Wall Calendar is not just a simple calendar grid. It is designed as an **interac
 
 ### 5. Festival and Special Event Highlights
 * Certain dates are highlighted for festivals or notable occasions
-* Hovering over those dates shows a small visual tile with:
+* Hovering over those dates in desktop view or single-clicking those in mobile view shows a small visual tile with:
   - event/festival image
   - event/festival name
 
 ### 6. Date Range Selection
 * Users can click once to start selecting a date
+* If the user intends to select a date highlighted by a festival in mobile view, a single click displays the pop-up for the festival, while another click after a    brief time period allows him to proceed with the date range selection.
 * Clicking another date completes the range
 * Supports:
   - **single-day selection**
