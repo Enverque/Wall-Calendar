@@ -10,7 +10,7 @@ export default function SpecialDayReminder({ day, x, y, visible }) {
         left: x,
         top: y,
         zIndex: 9999,
-        width: 'min(248px, calc(100% - 24px))',
+        width: 'min(228px, calc(100% - 28px))',
         borderRadius: '14px',
         overflow: 'hidden',
         boxShadow: '0 16px 32px rgba(0,0,0,0.16)',
@@ -22,7 +22,7 @@ export default function SpecialDayReminder({ day, x, y, visible }) {
       <div
         style={{
           background: day.color || '#ff6b6b',
-          padding: '16px',
+          padding: '13px',
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
@@ -39,10 +39,10 @@ export default function SpecialDayReminder({ day, x, y, visible }) {
         }} />
 
         <div style={{ 
-          fontSize: '1.6rem', 
+          fontSize: '1.35rem', 
           background: 'rgba(255,255,255,0.2)', 
-          width: '42px', 
-          height: '42px', 
+          width: '38px', 
+          height: '38px', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -56,7 +56,7 @@ export default function SpecialDayReminder({ day, x, y, visible }) {
         
         <div style={{ position: 'relative', zIndex: 1 }}>
           <p style={{ 
-            fontSize: '0.62rem', 
+            fontSize: '0.58rem', 
             opacity: 0.8, 
             margin: 0, 
             letterSpacing: '0.1em', 
@@ -66,7 +66,7 @@ export default function SpecialDayReminder({ day, x, y, visible }) {
             Special Day
           </p>
           <p style={{ 
-            fontSize: '0.88rem', 
+            fontSize: '0.8rem', 
             fontWeight: 700, 
             margin: '4px 0 0',
             lineHeight: 1.2

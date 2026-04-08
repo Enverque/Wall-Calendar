@@ -27,7 +27,7 @@ export default function QuoteTooltip({ quote, x, y, visible }) {
         left: x,
         top: y,
         zIndex: 9998,
-        width: 'min(196px, calc(100vw - 24px))',
+        width: 'min(196px, calc(100vw - 36px))',
         borderRadius: 12,
         overflow: 'hidden',
         boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
@@ -38,7 +38,7 @@ export default function QuoteTooltip({ quote, x, y, visible }) {
       <div
         style={{
           background: colors.bg,
-          padding: '12px 14px',
+          padding: '11px 13px',
           color: colors.text,
           borderRadius: 12,
           position: 'relative',
@@ -72,7 +72,7 @@ export default function QuoteTooltip({ quote, x, y, visible }) {
         {/* Quote text */}
         <p
           style={{
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             lineHeight: 1.45,
             margin: 0,
             fontWeight: 500,
@@ -87,7 +87,7 @@ export default function QuoteTooltip({ quote, x, y, visible }) {
         {}
         <p
           style={{
-            fontSize: '0.58rem',
+            fontSize: '0.54rem',
             marginTop: 6,
             opacity: 0.7,
             position: 'relative',

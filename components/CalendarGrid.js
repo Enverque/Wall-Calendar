@@ -66,6 +66,7 @@ export default function CalendarGrid({
   const [historyDay, setHistoryDay] = useState(null)
   const [cellAnimations, setCellAnimations] = useState({})
   const hoverTimer = useRef(null)
+  const suppressClickRef = useRef(false)
 
   const closeActivePopup = useCallback(() => {
     setActivePopup(null)
@@ -141,6 +142,11 @@ export default function CalendarGrid({
     return buildPosition(preferredSides[0] ?? 'top')
   }, [])
 
+  const getIsMobileView = useCallback(
+    () => typeof window !== 'undefined' && window.innerWidth <= 640,
+    []
+  )
+
   
   useEffect(() => {
     const animations = {}
@@ -167,48 +173,47 @@ export default function CalendarGrid({
     return SPECIAL_DAYS[key] || null
   }, [month])
 
-  const handleMouseEnter = useCallback((e, d) => {
-    if (!d) return
-    onDayHoverImage?.(d)
+  const openPopupForDay = useCallback((rect, d, isMobileView) => {
+    if (!d) return false
 
-    if (hoverTimer.current) clearTimeout(hoverTimer.current)
-    closeActivePopup()
+    const quotePosition = getPopupPosition(rect, isMobileView ? 168 : 196, isMobileView ? 100 : 112, {
+      side: isMobileView ? 'bottom' : 'right',
+      sides: isMobileView ? ['bottom', 'top'] : ['right', 'left', 'bottom', 'top'],
+      align: 'center',
+      gap: isMobileView ? 14 : 32,
+    })
+    const festivalPosition = getPopupPosition(rect, isMobileView ? 148 : 164, isMobileView ? 116 : 132, {
+      side: isMobileView ? 'bottom' : 'left',
+      sides: isMobileView ? ['bottom', 'top'] : ['left', 'right', 'top', 'bottom'],
+      align: 'center',
+      gap: isMobileView ? 14 : 24,
+    })
+    const specialPosition = getPopupPosition(rect, isMobileView ? 212 : 248, isMobileView ? 84 : 92, {
+      side: isMobileView
+        ? 'bottom'
+        : rect.bottom - (containerRef.current?.getBoundingClientRect().top ?? 0) > 240 ? 'top' : 'bottom',
+      sides: isMobileView
+        ? ['bottom', 'top']
+        : rect.bottom - (containerRef.current?.getBoundingClientRect().top ?? 0) > 240
+          ? ['top', 'bottom', 'right', 'left']
+          : ['bottom', 'top', 'right', 'left'],
+      align: 'center',
+      gap: isMobileView ? 16 : 30,
+    })
 
-    const rect = e.currentTarget.getBoundingClientRect()
-    const quotePosition = getPopupPosition(rect, 196, 112, {
-      side: 'right',
-      sides: ['right', 'left', 'bottom', 'top'],
-      align: 'center',
-      gap: 32,
-    })
-    const festivalPosition = getPopupPosition(rect, 164, 132, {
-      side: 'left',
-      sides: ['left', 'right', 'top', 'bottom'],
-      align: 'center',
-      gap: 24,
-    })
-    const specialPosition = getPopupPosition(rect, 248, 92, {
-      side: rect.bottom - (containerRef.current?.getBoundingClientRect().top ?? 0) > 240 ? 'top' : 'bottom',
-      sides: rect.bottom - (containerRef.current?.getBoundingClientRect().top ?? 0) > 240
-        ? ['top', 'bottom', 'right', 'left']
-        : ['bottom', 'top', 'right', 'left'],
-      align: 'center',
-      gap: 30,
-    })
-    // Show special day reminder
     const special = getSpecialDay(d)
     if (special) {
       setActivePopup({
         type: 'special',
         data: special,
         position: specialPosition,
+        day: d,
       })
-      return
+      return true
     }
 
     const currentDay = isToday(d)
 
-    // Show quote only for the current non-special day
     if (currentDay) {
       const quote = getQuoteForDay(quotes, year, month, d)
       if (quote) {
@@ -216,9 +221,11 @@ export default function CalendarGrid({
           type: 'quote',
           data: quote,
           position: quotePosition,
+          day: d,
         })
+        return true
       }
-      return
+      return false
     }
 
     const fest = getFestival(d)
@@ -227,20 +234,60 @@ export default function CalendarGrid({
         type: 'festival',
         data: fest,
         position: festivalPosition,
+        day: d,
       })
+      return true
     }
-  }, [year, month, quotes, getFestival, getPopupPosition, getSpecialDay, onDayHoverImage, closeActivePopup])
+
+    return false
+  }, [getFestival, getPopupPosition, getSpecialDay, isToday, month, quotes, year])
+
+  const handleMouseEnter = useCallback((e, d) => {
+    if (!d || getIsMobileView()) return
+    onDayHoverImage?.(d)
+
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    closeActivePopup()
+    openPopupForDay(e.currentTarget.getBoundingClientRect(), d, false)
+  }, [onDayHoverImage, closeActivePopup, openPopupForDay, getIsMobileView])
 
   const handleMouseLeave = useCallback(() => {
+    if (getIsMobileView()) return
     onDayHoverImage?.(null)
     hoverTimer.current = setTimeout(() => {
       closeActivePopup()
     }, 100)
-  }, [onDayHoverImage, closeActivePopup])
+  }, [onDayHoverImage, closeActivePopup, getIsMobileView])
+
+  const handleTouchStart = useCallback((e, d) => {
+    if (!d || !getIsMobileView()) return
+
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+
+    const isSamePopupDay = activePopup?.day === d
+    if (isSamePopupDay) {
+      suppressClickRef.current = false
+      return
+    }
+
+    onDayHoverImage?.(d)
+    closeActivePopup()
+    const opened = openPopupForDay(e.currentTarget.getBoundingClientRect(), d, true)
+    suppressClickRef.current = opened
+  }, [activePopup?.day, closeActivePopup, getIsMobileView, onDayHoverImage, openPopupForDay])
+
+  const handleDayPress = useCallback((d) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false
+      return
+    }
+    onDayClick(d)
+  }, [onDayClick])
 
   const handleDayDoubleClick = useCallback((d) => {
     if (!d) return
     if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    suppressClickRef.current = false
     closeActivePopup()
     const eventKey = `${pad2(month + 1)}-${pad2(d)}`
     const eventsForDay = Array.isArray(events?.[eventKey]) ? events[eventKey].slice(0, 3) : null
@@ -250,6 +297,7 @@ export default function CalendarGrid({
 
   useEffect(() => {
     if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    suppressClickRef.current = false
     closeActivePopup()
   }, [rangeStart, rangeEnd, closeActivePopup])
 
@@ -297,10 +345,11 @@ export default function CalendarGrid({
               } ${isRangeEnd(d) ? 'day-end' : ''} ${isInRange(d) ? 'day-in-range' : ''} ${
                 fest ? 'day-festival' : ''
               } ${special ? 'day-special' : ''} ${isPastDay(d) ? 'day-past' : ''}`}
-              onClick={() => onDayClick(d)}
+              onClick={() => handleDayPress(d)}
               onDoubleClick={() => handleDayDoubleClick(d)}
               onMouseEnter={(e) => handleMouseEnter(e, d)}
               onMouseLeave={handleMouseLeave}
+              onTouchStart={(e) => handleTouchStart(e, d)}
               style={{
                 animationName: animation ? animation.animation : 'none',
                 animationDuration: '0.4s',
