@@ -236,17 +236,7 @@ export default function WallCalendar() {
         >
           <div className="calendar-page-shadow" />
           <div className="flex flex-col md:flex-row calendar-page-body">
-            {/* Notes panel */}
-            <NotesPanel
-              note={currentNote}
-              onChange={handleNoteChange}
-              rangeStart={rangeStart}
-              rangeEnd={rangeEnd}
-              monthName={MONTH_NAMES[month]}
-            />
-
-            {}
-            <div className="flex-1 min-w-0 p-4 md:p-8">
+            <div className="order-1 md:order-2 flex-1 min-w-0 p-4 md:p-8">
               <CalendarGrid
                 year={year}
                 month={month}
@@ -268,6 +258,17 @@ export default function WallCalendar() {
                   Clear selection
                 </button>
               )}
+            </div>
+
+            {/* Notes panel */}
+            <div className="order-2 md:order-1">
+              <NotesPanel
+                note={currentNote}
+                onChange={handleNoteChange}
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                monthName={MONTH_NAMES[month]}
+              />
             </div>
           </div>
         </div>
