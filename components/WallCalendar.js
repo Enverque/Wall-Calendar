@@ -52,14 +52,15 @@ export default function WallCalendar() {
   const [rangeStart, setRangeStart] = useState(null)
   const [rangeEnd, setRangeEnd]     = useState(null)
   const [selecting, setSelecting]   = useState(false)
+  const [noteDate, setNoteDate] = useState(null)
 
   // Notes
   const [notes, setNotes] = useState({})
-  const currentNote = rangeStart ? notes[`${rangeStart.y}-${rangeStart.m}-${rangeStart.d}`] || '' : ''
+  const currentNote = noteDate ? notes[`${noteDate.y}-${noteDate.m}-${noteDate.d}`] || '' : ''
 
   const handleNoteChange = (text) => {
-    if (!rangeStart) return
-    const key = `${rangeStart.y}-${rangeStart.m}-${rangeStart.d}`
+    if (!noteDate) return
+    const key = `${noteDate.y}-${noteDate.m}-${noteDate.d}`
     setNotes(prev => ({ ...prev, [key]: text }))
   }
 
@@ -113,6 +114,7 @@ export default function WallCalendar() {
   const handleDayClick = useCallback((day) => {
     if (!day) return
     const clicked = { y: year, m: month, d: day }
+    setNoteDate(clicked)
     if (!selecting || !rangeStart) {
       setRangeStart(clicked); setRangeEnd(null); setSelecting(true)
     } else {
@@ -127,8 +129,22 @@ export default function WallCalendar() {
     }
   }, [selecting, rangeStart, year, month])
 
+  useEffect(() => {
+    setNoteDate((prev) => {
+      if (!prev) return prev
+      if (prev.y === year && prev.m === month) return prev
+
+      const daysInTargetMonth = new Date(year, month + 1, 0).getDate()
+      return {
+        y: year,
+        m: month,
+        d: Math.min(prev.d, daysInTargetMonth),
+      }
+    })
+  }, [month, year])
+
   const clearRange = () => {
-    setRangeStart(null); setRangeEnd(null); setSelecting(false)
+    setRangeStart(null); setRangeEnd(null); setSelecting(false); setNoteDate(null)
   }
 
   const toggleYearTimeline = useCallback(() => {
@@ -265,8 +281,8 @@ export default function WallCalendar() {
               <NotesPanel
                 note={currentNote}
                 onChange={handleNoteChange}
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
+                rangeStart={noteDate}
+                rangeEnd={null}
                 monthName={MONTH_NAMES[month]}
               />
             </div>
